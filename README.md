@@ -2,6 +2,5 @@
 
 To count base frequencies, 
 
-    python cow.py
-
-Requires: a fasta file names sequence.py in same directory
+    python cow.py filename.fasta
+    python Seqtest.py filename.fasta

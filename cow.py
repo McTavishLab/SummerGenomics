@@ -1,7 +1,16 @@
 from __future__ import division
 # prevents Python from rounding numbers below 1 to 0
 
-cowfile = open("sequence.fasta")
+
+import sys
+inFile = sys.argv[1]
+cowfile = open(infile)
+
+
+firstline = cowfile.readline()
+print("firstline is {f}".format(f=firstline))
+
+
 file_contents = cowfile.read()
 print(file_contents)
 bos_length = len(file_contents)
