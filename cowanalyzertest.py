@@ -59,11 +59,17 @@ for line in infi.readlines():
             added_seq = sequence_dict[sample_name] + base_call
             sequence_dict[sample_name] = added_seq
 
+infi.close()
 
+#See sequence for each sample
+#for key in sequence_dict:
+#     print("name {}, sequence {}".format(key, sequence_dict[key]))
+
+#Write out sequences to fasta file
 for key in sequence_dict:
-     print("name {}, sequence {}".format(key, sequence_dict[key]))
+  outline = ">%s\n%s\n" % (key,sequence_dict[key])
+  outfile.write(outline)
 
-outfile.write(sequence_dict)
 outfile.close()
 
 
