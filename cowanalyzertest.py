@@ -5,14 +5,20 @@
 import sys
 import os
 import random
+import gzip
 
-bos_file = "simulated_data_mctavish_lab.vcf"
+cutoff = 6000000
+
+bos_file = sys.argv[1]
+#"simulated_data_mctavish_lab.vcf"
 
 base = os.path.splitext(bos_file)[0]
 outfile_name = base + ".fasta"
 outfile = open(outfile_name, "w")
 
-
+#Skip mitochondrial information
+mito_tag = "NC_006853.1"
+sep = "/"
 
 def vcf_call_to_bases(ref, alt, call):
     geno = call.replace('0', ref).replace('1',alt)
@@ -34,10 +40,12 @@ index_dict = {}
 sequence_dict = {}
 
 
-infi = open(bos_file)
+infi = gzip.open(bos_file,"r")
 counter = 0
 for line in infi.readlines():
     counter += 1
+    if(counter >= cutoff):
+        break
 #    print("line {}".format(counter))
     if line.startswith('##'):
         pass
@@ -47,18 +55,21 @@ for line in infi.readlines():
         for i, val in enumerate(headers):
             index_dict[i]=val
     else:
-        if "./." in line:
-            pass
+        if ".%s." % (sep) in line:
+            continue
+        elif mito_tag in line:
+            continue
         vcfrow = line.split()
         for ii in range(9,len(vcfrow)):
             sample_name = index_dict[ii]
             if sample_name not in sequence_dict:
                 sequence_dict[sample_name] = ''
-            geno_call = vcf_call_to_bases(vcfrow[3], vcfrow[4], vcfrow[ii])
+            geno_call = vcf_call_to_bases(vcfrow[3], vcfrow[4], vcfrow[ii].split(":")[0])
             base_call = random_base(geno_call)
             added_seq = sequence_dict[sample_name] + base_call
             sequence_dict[sample_name] = added_seq
-
+    if(counter % 10000==0):
+        print(counter)
 infi.close()
 
 #See sequence for each sample
