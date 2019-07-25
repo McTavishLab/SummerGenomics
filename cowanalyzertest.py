@@ -63,7 +63,8 @@ for line in infi.readlines():
 for key in sequence_dict:
      print("name {}, sequence {}".format(key, sequence_dict[key]))
 
-
+outfile.write(sequence_dict)
+outfile.close()
 
 
 '''
