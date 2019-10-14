@@ -42,6 +42,9 @@ with open(meta_file,"r") as fp:
 #phased or unphased?
 sep = "/"
 
+#mitochondrial DNA identifier 
+mito_tag = "NC_006853.1"
+
 #Open file
 file = gzip.open(infile,"r")
 line = file.readline()
@@ -64,11 +67,18 @@ for pop in populations:
 abba = 0.0;baba = 0.0
 counter =0.0
 
+#Keep count of abaa and baaa
+abaa = 0.0;baaa = 0.0
+counter = 0.0 
+
 #Go through line by line
 for line in file:
   counter += 1
   spline = line.split()
-  #Ignore missing data
+  #ignore mitochondria DNA
+  if mito_tag in line:
+    continue
+  #Ignore missing data 
   if ".%s." %(sep) in line:
     continue
   #Only biallelic
@@ -80,8 +90,14 @@ for line in file:
     genotype = genotype_raw.split(':')[0]
     alleles.append(random_geno(genotype,sep))
   #Ignore sites where p3 is not derived and where p1 and p2 have same allele
-  if isAncestral(alleles[2],alleles[3]) or alleles[0] == alleles[1]:
-    continue
+  #if isAncestral(alleles[2],alleles[3]) or alleles[0] == alleles[1]:
+   # continue
+  #ABAA:p2 has derived allele
+  if (isAncestral(alleles[0],alleles[3])) and (isAncestral(alleles[2],alleles[3])) and alleles[1] != alleles[3]:
+    abaa +=1 
+  #BAAA: p1 has derived allele
+  if alleles[0] != alleles[3] and (isAncestral(alleles[2],alleles[3])):
+    baaa +=1
   #Is it ABBA or BABA
   #ABBA: p1 has ancestral allele
   if(isAncestral(alleles[0],alleles[3])):
@@ -92,17 +108,23 @@ for line in file:
     print("On line {}. ABBA is {}. BABA is {}".format(counter,abba,baba))
 file.close()
 
+d_num = (baaa - abaa) + (abba - baba)
+d_denom = (baaa + abaa + abba + baba)
 #Calculate D
 try:
   d = (abba - baba)/(abba + baba)
 except ZeroDivisionError:
   d = 'nan'
-
+#Calculate D+
+try:
+  d_plus = d_num/d_denom
+except ZeroDivisionError:
+  d_plus = 'nan'
 #Output results
 fout = open(outfile,"w")
-outfile_header="ABBA\tBABA\tD\n"
+outfile_header="ABBA\tBABA\tABAA\tBAAA\tD\tDPlus\n"
 fout.write(outfile_header)
-outline = str(abba) + "\t" + str(baba) + "\t" + str(d) + "\n"
+outline = str(abba) + "\t" + str(baba) + "\t" + str(abaa) + "\t" + str(baaa) "\t" + str(d) + str(d_plus) + "\n"
 fout.write(outline)
 fout.close()
 
