@@ -2,6 +2,7 @@ import random as rd
 import argparse
 import gzip
 import sys
+import os
 
 #Calculate D genomewide.
 #python pytonName.py -infile /path/to/name.vcf.gz -outfile /path/to/outfile.csv -p1 cow_cow -p2 cow_monkey -p3 cow_bison -p4 cow_human -meta meta.csv
@@ -120,12 +121,20 @@ try:
   d_plus = d_num/d_denom
 except ZeroDivisionError:
   d_plus = 'nan'
-#Output results
-fout = open(outfile,"w")
+#Things to be outputed 
 outfile_header="ABBA\tBABA\tABAA\tBAAA\tD\tDPlus\n"
-fout.write(outfile_header)
 outline = str(abba) + "\t" + str(baba) + "\t" + str(abaa) + "\t" + str(baaa) "\t" + str(d) + str(d_plus) + "\n"
-fout.write(outline)
-fout.close()
+#Output results & checking if file already exist 
+exists = os.path.exists(outfile):
+if exists:
+  ofile = open(outfile, "a") 
+  ofile.write(outfile_header)
+  ofile.write(outline)
+  ofile.close()
+ else:
+  fout = open(outfile,"w")
+  fout.write(outfile_header)
+  fout.write(outline)
+  fout.close()
 
 
