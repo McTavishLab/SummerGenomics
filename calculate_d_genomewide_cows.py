@@ -43,7 +43,7 @@ with open(meta_file,"r") as fp:
 #phased or unphased?
 sep = "/"
 
-#mitochondrial DNA identifier 
+#mitochondrial DNA identifier
 mito_tag = "NC_006853.1"
 
 #Open file
@@ -70,7 +70,6 @@ counter =0.0
 
 #Keep count of abaa and baaa
 abaa = 0.0;baaa = 0.0
-counter = 0.0 
 
 #Go through line by line
 for line in file:
@@ -79,9 +78,9 @@ for line in file:
   #ignore mitochondria DNA
   if mito_tag in line:
     continue
-  #Ignore missing data 
-  if ".%s." %(sep) in line:
-    continue
+#  #Ignore missing data
+#  if ".%s." %(sep) in line:
+#    continue
   #Only biallelic
   if(nucleotides.count(spline[3])!=1 or nucleotides.count(spline[4])!=1):
     continue
@@ -90,20 +89,23 @@ for line in file:
     genotype_raw = spline[pop_index_dicc[pop]]
     genotype = genotype_raw.split(':')[0]
     alleles.append(random_geno(genotype,sep))
+  #Ignore missing data
+  if("." in alleles):
+    continue
   #Ignore sites where p3 is not derived and where p1 and p2 have same allele
   #if isAncestral(alleles[2],alleles[3]) or alleles[0] == alleles[1]:
    # continue
   #ABAA:p2 has derived allele
   if (isAncestral(alleles[0],alleles[3])) and (isAncestral(alleles[2],alleles[3])) and alleles[1] != alleles[3]:
-    abaa +=1 
+    abaa +=1
   #BAAA: p1 has derived allele
-  if alleles[0] != alleles[3] and (isAncestral(alleles[2],alleles[3])):
+  elif alleles[0] != alleles[3] and (isAncestral(alleles[2],alleles[3])):
     baaa +=1
   #Is it ABBA or BABA
   #ABBA: p1 has ancestral allele
-  if(isAncestral(alleles[0],alleles[3])):
+  elif(isAncestral(alleles[0],alleles[3])):
     abba += 1
-  elif(isAncestral(alleles[1],alleles[3])):
+  else(isAncestral(alleles[1],alleles[3])):
     baba += 1
   if(counter%10000==0):
     print("On line {}. ABBA is {}. BABA is {}".format(counter,abba,baba))
@@ -121,17 +123,17 @@ try:
   d_plus = d_num/d_denom
 except ZeroDivisionError:
   d_plus = 'nan'
-#Things to be outputed 
-outfile_header="ABBA\tBABA\tABAA\tBAAA\tD\tDPlus\n"
-outline = str(abba) + "\t" + str(baba) + "\t" + str(abaa) + "\t" + str(baaa) "\t" + str(d) + str(d_plus) + "\n"
-#Output results & checking if file already exist 
-exists = os.path.exists(outfile):
+
+#Things to be outputed
+outfile_header="p1\tp2\tp3\tp4\tABBA\tBABA\tABAA\tBAAA\tD\tDPlus\n"
+outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"+str(abba) + "\t" + str(baba) + "\t" + str(abaa) + "\t" + str(baaa) + "\t" + str(d) + str(d_plus) + "\n"
+#Output results & checking if file already exist
+exists = os.path.exists(outfile)
 if exists:
-  ofile = open(outfile, "a") 
-  ofile.write(outfile_header)
+  ofile = open(outfile, "a+")
   ofile.write(outline)
   ofile.close()
- else:
+else:
   fout = open(outfile,"w")
   fout.write(outfile_header)
   fout.write(outline)
