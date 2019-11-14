@@ -9,7 +9,7 @@ start= sys.argv[4] #This input should be the position at which to start
 end= sys.argv[5]#This should be the position at which to end
 #opening file
 f = gzip.open(infile, 'r')
-#opening outfile searching for
+#opening outfile
 outfi = open(outfile, 'w')
 #idk what it actually does pls explain
 alwrite = False
@@ -27,6 +27,5 @@ for line in fr:
 			alwrite = True
 		if end in line:
 			break
-#opening and writing outfile
-outfi.write(store)
+#closing outfile
 outfi.close()
