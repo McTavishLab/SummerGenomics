@@ -4,28 +4,36 @@ import gzip
 #input files & outfile
 infile= sys.argv[1] #name of vcf
 outfile= sys.argv[2] #outfilename
-look= sys.argv[3] #This input should be the chromosome name
+chrom= sys.argv[3] #This input should be the chromosome name
 start= sys.argv[4] #This input should be the position at which to start
 end= sys.argv[5] #This should be the position at which to end
 #opening file
 f = gzip.open(infile, 'r')
 #opening outfile
-outfi = open(outfile, 'w')
-#idk what it actually does pls explain
+outfi = open( outfile, 'w')
+#setting a button of sorts to print specfic lines 
 alwrite = False
-#reading file
-fr = f.readlines()
+#setting conditions 
+startnum=int(start)
+endnum=int(end)
+chrom_tag=str(chrom)
 #Getting header & data
-for line in fr:
+for line in f:
 	if line.startswith('##'):
 		continue
 	if line.startswith('#'):
 		outfi.write(line)
-	if look in line:
-		if alwrite or start in line:
+		print('Im printing header')
+	if chrom_tag in line:
+		lii = line.split()
+		basenum = int(lii[1])
+		if alwrite or basenum >= startnum:
 			outfi.write(line)
 			alwrite = True
-		if end in line:
+			print('im printing some lines')
+		if basenum >= endnum:
 			break
+#	else:
+#		print(line)
 #closing outfile
 outfi.close()
