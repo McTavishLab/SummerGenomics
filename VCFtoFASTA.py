@@ -6,7 +6,7 @@ import gzip
 
 
 cutoff = 500000
-
+cutoff_on = False
 
 bos_file = sys.argv[1]
 name_outfile = sys.argv[2]
@@ -66,7 +66,7 @@ print("Finished open file")
 counter = 0
 for line in infi:
     counter += 1
-    if(counter >= cutoff):
+    if(counter >= cutoff and cutoff_on):
         break
     if line.startswith('##'):
         pass
