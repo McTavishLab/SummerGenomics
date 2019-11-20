@@ -10,7 +10,10 @@ cutoff_on = False
 
 bos_file = sys.argv[1]
 name_outfile = sys.argv[2]
-meta_file = sys.argv[3]
+if len(sys>=4):
+    meta_file = sys.argv[3]
+else:
+    meta_file = False
 #"simulated_data_mctavish_lab.vcf"
 
 
@@ -118,24 +121,28 @@ infi.close()
 #for key in sequence_dict:
 
 #     print("name {}, sequence {}".format(key, sequence_dict[key]))
+if meta_file:
+    #Replace key wiht csv names
+    samp_name = {}
+    f = open(meta_file,'r')
+    for aline in f:
+        if 'population' in aline:
+            continue 
+        asplit = aline.split()
+        samp_name[asplit[1]]=asplit[0]
 
-#Replace key wiht csv names
-samp_name = {}
-f = open(meta_file,'r')
-for aline in f:
-    if 'population' in aline:
-        continue 
-    asplit = aline.split()
-    samp_name[asplit[1]]=asplit[0]
+    # outline = samp_name
+    #Write out sequences to fasta file
 
-# outline = samp_name
-#Write out sequences to fasta file
-
-for key in samp_name:
-    print key
-    outline = ">%s\n%s\n" % (key,sequence_dict[samp_name[key]])
-    outfile.write(outline)
+    for key in samp_name:
+        print key
+        outline = ">%s\n%s\n" % (key,sequence_dict[samp_name[key]])
+        outfile.write(outline)
+else:
+    for key in sequence_dict:
+        print key
+        outline = ">%s\n%s\n" % (key,sequence_dict[key])
+        outfile.write(outline)
 
 
-
-outfile.close()
+    outfile.close()
