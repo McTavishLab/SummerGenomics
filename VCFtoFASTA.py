@@ -54,7 +54,7 @@ def random_base(geno):
 
 
 index_dict = {}
-sequence_dict = {}
+sequence_dict = {'reference':''}
 
 
 
@@ -92,6 +92,8 @@ for line in infi:
             continue
   #      if(nucleotides.count(vcfrow[3])!=1 or nucleotides.count(vcfrow[4])!=1):
   #          continue
+        ref_seq = sequence_dict['reference'] + ref
+        sequence_dict['reference'] = ref_seq
         for ii in range(9,len(vcfrow)):
             sample_name = index_dict[ii]
             if sample_name not in sequence_dict:
