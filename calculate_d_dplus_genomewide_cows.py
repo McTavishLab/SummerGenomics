@@ -16,7 +16,7 @@ parser.add_argument('-p1',action="store",dest="p1")
 parser.add_argument('-p2',action="store",dest="p2")
 parser.add_argument('-p3',action="store",dest="p3")
 parser.add_argument('-p4',action="store",dest="p4")
-parser.add_argument('-meta',action="store",dest="meta")
+parser.add_argument('-meta',action="store",dest="meta_file")
 
 param=parser.parse_args()
 
@@ -27,15 +27,11 @@ def random_geno(genotype,sep):
 
 def isAncestral(allele,ancestral):
   return(allele == ancestral)
-#File name
-infile = param.infile
-outfile = param.outfile
 
 #Populations to be used
 populations = [param.p1,param.p2,param.p3,param.p4] #["bos_taurus","sanga_taurus","bos_indicus","bison_bison"]
-meta_file = param.meta
 pop_name_dicc = {}
-with open(meta_file,"r") as fp:
+with open(param.meta_file,"r") as fp:
   for aline in fp:
     aspline = aline.split()
     pop_name_dicc[aspline[1]]=aspline[0]
@@ -47,7 +43,7 @@ sep = "/"
 mito_tag = "NC_006853.1"
 
 #Open file
-file = gzip.open(infile,"r")
+file = gzip.open(param.infile,"r")
 line = file.readline()
 
 #Define nucleotides
@@ -109,7 +105,7 @@ for line in file:
     elif(isAncestral(alleles["pop2"],alleles["pop4"])):
       baba += 1
   if(counter%10000==0):
-    print("On line {}. ABBA is {}. BABA is {}".format(counter,abba,baba))
+    print("On line {}. ABBA is {}. BABA is {}.BAAA is {}. ABAA is {}".format(counter,abba,baba,baaa,abaa))
 file.close()
 
 #Calculate D
@@ -127,18 +123,18 @@ except ZeroDivisionError:
   dplus = 'nan'
 
 #Output results. If outfile already exists, append to it instead of creating outfile again
-if(os.path.exists(outfile)):
-  fout = open(outfile,"a+")
+if(os.path.exists(param.outfile)):
+  fout = open(param.outfile,"a+")
   outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"
-  outline += str(abba) + "\t" + str(baba) + "\t" + str(d) + "\t"+str(dplus)+"\n"
+  outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d) + "\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
 else:
-  fout = open(outfile,"w")
-  outfile_header="p1\tp2\tp3\tp4\tABBA\tBABA\tD\tD+\n"
+  fout = open(param.outfile,"w")
+  outfile_header="p1\tp2\tp3\tp4\tABBA\tBABA\tBAAA\tABAA\tD\tD+\n"
   fout.write(outfile_header)
   outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"
-  outline += str(abba) + "\t" + str(baba) + "\t" + str(d)+"\t"+str(dplus)+"\n"
+  outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d)+"\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
 
