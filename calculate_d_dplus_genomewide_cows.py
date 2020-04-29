@@ -82,10 +82,15 @@ for line in file:
   alleles = {}
   pop_count = 1
   for pop in populations:
-    genotype_raw = spline[pop_index_dicc[pop]]
-    genotype = genotype_raw.split(':')[0]
-    alleles["pop"+str(pop_count)] = random_geno(genotype,sep)
-    pop_count+=1
+    if pop == "bos_taurus":
+        alleles["pop"+str(pop_count)] = "0"
+        pop_count+=1
+    else:
+        genotype_raw = spline[pop_index_dicc[pop]]
+        genotype = genotype_raw.split(':')[0]
+        alleles["pop"+str(pop_count)] = random_geno(genotype,sep)
+        pop_count+=1
+
   #Ignore sites where p1 and p2 have same allele
   if(alleles["pop1"] == alleles["pop2"]):
     continue
@@ -137,5 +142,3 @@ else:
   outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d)+"\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
-
-
