@@ -99,10 +99,10 @@ def get_sequence_for_sample(sample_name, bos_file):
             if sample_name == 'REF':
                 base_call = ref
             else:
-                pos += 1
                 alt = vcfrow[4]
                 if len(alt) > 1:
                     continue
+                pos += 1
           #      if(nucleotides.count(vcfrow[3])!=1 or nucleotides.count(vcfrow[4])!=1):
           #          continue
                 call = vcfrow[sample_index].split(":")[0]
