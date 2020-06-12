@@ -9,11 +9,6 @@ cutoff = 500000
 cutoff_on = False
 
 bos_file = sys.argv[1]
-if len(sys.argv) > 2:
-    sample_name = sys.argv[2]
-    get_sequence_for_sample(sample_name, bos_file)
-else:
-    pass
 
 #"simulated_data_mctavish_lab.vcf"
 
@@ -128,3 +123,8 @@ def get_sequence_for_sample(sample_name, bos_file):
 
 
 
+if len(sys.argv) > 2:
+    sample_name = sys.argv[2]
+    get_sequence_for_sample(sample_name, bos_file)
+else:
+    pass
