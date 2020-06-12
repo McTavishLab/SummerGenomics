@@ -74,6 +74,9 @@ def get_sequence_for_sample(sample_name, bos_file):
     else:
         infi = open(bos_file, 'r')
     counter = 0
+    outfile = open("{}.fasta".format(sample_name),'w')
+    outfile.write("> {}\n".format(sample_name))
+    pos = 0
     for line in infi:
         counter += 1
         if(counter >= cutoff and cutoff_on):
@@ -96,6 +99,7 @@ def get_sequence_for_sample(sample_name, bos_file):
             if sample_name == 'REF':
                 base_call = ref
             else:
+                pos += 1
                 alt = vcfrow[4]
                 if len(alt) > 1:
                     continue
@@ -108,17 +112,12 @@ def get_sequence_for_sample(sample_name, bos_file):
                 geno_call = vcf_call_to_bases(ref, alt, call)
                 assert(len(geno_call)==3),  geno_call
                 base_call = random_base(geno_call)
-            sample_sequence = sample_sequence + base_call
-        outfile = open("{}.fasta".format(sample_name),'w')
-        outfile.write("> {}\n".format(sample_name))
-        for i, base in enumerate(sample_sequence):
-            pos = i+1
-            outfile.write(base)
-            if(pos % 80 == 0):
-                outfile.write('\n')
-        outfile.close()
+                outfile.write(base_call)
+                if(pos % 80 == 0):
+                    outfile.write('\n')
         if(counter % 10000==0):
             print(counter)
+    outfile.close()
     infi.close()
 
 
