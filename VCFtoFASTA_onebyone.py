@@ -96,13 +96,13 @@ def get_sequence_for_sample(sample_name, bos_file):
             vcfrow = line.split()
             assert(len(vcfrow)>4), vcfrow
             ref = vcfrow[3]
+            alt = vcfrow[4]
+	        if len(alt) > 1:
+	            continue
+            pos += 1     
             if sample_name == 'REF':
                 base_call = ref
             else:
-                alt = vcfrow[4]
-                if len(alt) > 1:
-                    continue
-                pos += 1
           #      if(nucleotides.count(vcfrow[3])!=1 or nucleotides.count(vcfrow[4])!=1):
           #          continue
                 call = vcfrow[sample_index].split(":")[0]
@@ -112,9 +112,9 @@ def get_sequence_for_sample(sample_name, bos_file):
                 geno_call = vcf_call_to_bases(ref, alt, call)
                 assert(len(geno_call)==3),  geno_call
                 base_call = random_base(geno_call)
-                outfile.write(base_call)
-                if(pos % 80 == 0):
-                    outfile.write('\n')
+            outfile.write(base_call)
+            if(pos % 80 == 0):
+                outfile.write('\n')
         if(counter % 10000==0):
             print(counter)
     outfile.close()
