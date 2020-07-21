@@ -10,7 +10,7 @@ cutoff_on = False
 
 bos_file = sys.argv[1]
 name_outfile = sys.argv[2]
-if len(sys>=4):
+if (len(sys.argv)>=4):
     meta_file = sys.argv[3]
 else:
     meta_file = False
@@ -34,14 +34,14 @@ sep = "/"
 
 def vcf_call_to_bases(ref, alt, call):
     assert(len(ref)==1), "ref is {}, why not caught as INDEL?????".format(ref)
-    geno = call.replace('0', ref).replace('1',alt).replace('.','N')
+    geno = call.replace('0', ref).replace('1',alt).replace('.','?')
     #todo: handle ./.?
     return geno
 
 
 
 def random_base(geno):
-    nucleotides=["A","T","C","G","N"]
+    nucleotides=["A","T","C","G","?"]
     index = random.randint(1,2)
     assert(geno[0] in nucleotides), "geno 0 is {}".format(geno[0])
     assert(geno[2] in nucleotides), "geno 0 is {}".format(geno[2])
@@ -59,12 +59,12 @@ def random_base(geno):
 index_dict = {}
 sequence_dict = {'reference':''}
 
-
-
-#infi = gzip.open(bos_file,"r")
-
 print("About to open file")
-infi = open(bos_file, "r")
+if 'gz' in bos_file:
+	infi = gzip.open(bos_file, 'r')
+else:
+	infi = open(bos_file, 'r')
+#infi = gzip.open(bos_file,"r")
 print("Finished open file")
 counter = 0
 for line in infi:
@@ -89,6 +89,7 @@ for line in infi:
 #            print("skipping line {} due to indel".format(counter))
             continue
         vcfrow = line.split()
+    	assert(len(vcfrow)>4), vcfrow
         ref = vcfrow[3]
         alt = vcfrow[4]
         if len(alt) > 1:
@@ -122,25 +123,25 @@ infi.close()
 
 #     print("name {}, sequence {}".format(key, sequence_dict[key]))
 if meta_file:
-    #Replace key wiht csv names
+    #Replace key with csv names
     samp_name = {}
     f = open(meta_file,'r')
     for aline in f:
         if 'population' in aline:
-            continue 
+            continue
         asplit = aline.split()
         samp_name[asplit[1]]=asplit[0]
 
     # outline = samp_name
     #Write out sequences to fasta file
-
-    for key in samp_name:
-        print key
-        outline = ">%s\n%s\n" % (key,sequence_dict[samp_name[key]])
+    print(sequence_dict.keys())
+    for messy_name in sequence_dict:
+        assert(messy_name in sequence_dict), messy_name
+        outline = ">%s\n%s\n" % (samp_name.get(messy_name,messy_name),sequence_dict[messy_name])
         outfile.write(outline)
 else:
     for key in sequence_dict:
-        print key
+        print(key)
         outline = ">%s\n%s\n" % (key,sequence_dict[key])
         outfile.write(outline)
 
