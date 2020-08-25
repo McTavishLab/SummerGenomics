@@ -22,15 +22,15 @@ assert header == ["filename","idnum","individualID","pop"], header
 for lin in mappings:
     lii = lin.strip().split(',')
     if len(lii)==4:
-        info[lii[0]]={"label":lii[2], 'pop':lii[3]}
+        info[lii[0]]={"ind_name":lii[2], 'pop':lii[3]}
 
 
 fi= open(args.output,'w')
-fi.write('filename, label, pop\n')
+fi.write('filename, ind_name, pop\n')
 for samp in open(args.input):
     samp=samp.strip()
     assert(samp in info), samp
-    fi.write("{},{},{}\n".format(samp, info[samp]['label'],info[samp]['pop']))
+    fi.write("{},{},{}\n".format(samp, info[samp]['ind_name'],info[samp]['pop']))
 
 
 fi.close()
