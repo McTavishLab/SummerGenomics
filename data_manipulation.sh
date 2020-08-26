@@ -10,6 +10,8 @@ BEDNAME="ALL.AUTO"
 gunzip -c vcf_structure_filtered.vcf.gz | bgzip  > ${STUB}.vcf.bgz
 
 bcftools index ${STUB}.vcf.bgz 
+
+
 bcftools query -l ${STUB}.vcf.bgz > samplenames.txt
 python get_label_pops.py -map label_match.csv -in samplenames.txt -out samplenames.csv
 
@@ -44,7 +46,7 @@ OUTDIR=admix_results
 mkdir -p $OUTDIR
 
 for K in {2..12}; do
-    CMD="cd $OUTDIR; admixture --cv -j8 $BED_FILE $K" #Normally you should give --cv as first option to admixture
+    CMD="cd $OUTDIR; dist/admixture_linux-1.3.0/admixture --cv -j8 $BED_FILE $K" #Normally you should give --cv as first option to admixture
     echo $CMD
     # sbatch -c 8 --mem 12000 --wrap="$CMD"
 done

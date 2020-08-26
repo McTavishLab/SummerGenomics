@@ -1,4 +1,7 @@
-# SummerGenomics
+# African Cattle Analyses
+
+
+pip install ipykernel  
 
 To count base frequencies, 
 
