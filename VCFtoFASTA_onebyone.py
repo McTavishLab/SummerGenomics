@@ -1,32 +1,39 @@
+"""A script to create a fasta file of one sample from a vcf"""
 import sys
 import os
 import random
 import gzip
 
 
+# Input file - should be in vcf format, can me .gz or uncompress
+bos_file = sys.argv[1]
 
+
+# If you run with only an input file, will print sample names and exit
+
+# Second argument should be the sample name you want a fasta for
+if len(sys.argv) > 2:
+    sample_name = sys.argv[2]
+else:
+    sample_name = None
+
+
+## Useful for running a quick trial
+## Stops after cutoff number of sites
 cutoff = 500000
 cutoff_on = False
 
-bos_file = sys.argv[1]
 
-#"simulated_data_mctavish_lab.vcf"
-
-
-
-#Skip mitochondrial information
+# Skip mitochondrial information
+## TODO should be filtered before instead of hard coded here
 mito_tag = "NC_006853.1"
 sep = "/"
-
-
 
 def vcf_call_to_bases(ref, alt, call):
     assert(len(ref)==1), "ref is {}, why not caught as INDEL?????".format(ref)
     geno = call.replace('0', ref).replace('1',alt).replace('.','?')
     #todo: handle ./.?
     return geno
-
-
 
 def random_base(geno):
     nucleotides=["A","T","C","G","?"]
@@ -39,8 +46,6 @@ def random_base(geno):
         return geno[2]
     else:
         print("ERRROORRRR")
-
-
 
 
 
@@ -97,8 +102,8 @@ def get_sequence_for_sample(sample_name, bos_file):
             assert(len(vcfrow)>4), vcfrow
             ref = vcfrow[3]
             alt = vcfrow[4]
-	        if len(alt) > 1:
-	            continue
+            if len(alt) > 1: #Skips multi allele, or indels
+                continue
             pos += 1     
             if sample_name == 'REF':
                 base_call = ref
@@ -117,13 +122,12 @@ def get_sequence_for_sample(sample_name, bos_file):
                 outfile.write('\n')
         if(counter % 10000==0):
             print(counter)
+    outfile.write('\n')
     outfile.close()
     infi.close()
 
 
 
-if len(sys.argv) > 2:
-    sample_name = sys.argv[2]
+if sample_name:
     get_sequence_for_sample(sample_name, bos_file)
-else:
-    pass
+
