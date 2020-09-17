@@ -1,12 +1,85 @@
 
 #!/usr/bin/env bash
+#examples on how to label the files 
+##im sure there are ways to make it so that we dont have to manually input everything? ?
+sample=
+sample.1= 
+sample.2=
+sample.trimmed_1=
+sample.trimmed_2=
+sample.single=
+reference_genome=
+mapping=sample.sam
+mapping_2=sample.fixmate.bam
+mapping_3=sample.sorted.bam
+mapping_4=sample.sorted.dedup.bam
+mapping_5=sample.sorted.dedup.q20.bam
+#steps needed for grabbing data from ncbi 
+fastq-dump --split-files $sample    
+sickle pe -f sample.1 -r sample.2 -o sample.trimmed_1 -p sample.trimmed_2 -s sample.single 
+fastqc -o sample.trimmed_1 some_directory/*.fastq.gz ## repeat with other trimmed data    
+bwa index $reference_genome
+samtools fadix $reference_genome
+bwa mem $reference_genome $sample.trimmed_1 $sample.trimmed_2 > $mappings
+#Preprocessing the alignment 
+samtools sort -n -O sam $mapping | samtools fixmate -m -O bam - $mapping_2
+samtools sort -O bam -o $mapping_3 $mapping_2
+samtools markdup -r -S $mapping_3 $mapping_4
+samtools view -h -b -q 20 $mapping_4 > $mapping_5
+#creating vcf
+##add any other alignments you want in the vcf
+samtools mpileup -u -g -f $reference_genome $sample_one $sample_two  | bcftools call -v -m -O z -o $vcf_name
+##Filtering vcf
+vcftools --gzvcf $vcf_name --remove-indels --maf $MAF --max-missing $MISS --minQ $QUAL --recode --stdout | gzip -c > $VCF_OUT
+## creating Vcf for structure plots 
 
-
-#strip ".sorted.dedup.q20.bam" out of label ids
-
-### INSERT CODE FOR HOW WE GOT TO 'vcf_structure_filtered.vcf.gz'
-
-
+## for networks 
+## make sure that this vcf has an outgroup!
+git clone https://github.com/crsl4/PhyloNetworks.jl.git
+#you will need the scripts folder 
+##maybe move the scripts folder into the folder where you want to place your analysis in 
+mkdir input 
+mkdir input/nexus 
+mkdir fasta 
+mkdir vcf
+mkdir raxml 
+mkdir raxml/bootstrap
+mkdir astral 
+mkdir snaq
+#subset vcfs into 50K wqindows 
+python creatingwindows.py $vcf_name $vcf_subset $window_size 
+#convert the subsets into fasta & nexus files 
+bash converting_windowa_to_vcf.sh #(does all this )
+mv *.nex input/nexus/.
+##we ran the raxml and astral part for the networks 
+###make sure to give the raxml.pl file the astral directory 
+../scripts/raxml.pl --seqdir=input/nexus --raxmldir=raxml --astraldir=astral > mylog 2>&1 &
+java -jar astral -i raxml/besttrees.tre -b astral/BSlistfiles -r 100 -o astral/astral.tre > astral/astral.screenlog 2>&1
+##Then in Julia 
+using PhyloNetworks
+using PhyloPlots
+using RCall 
+using Distributed #allows you to  run the anaylsis on multiple processors 
+##this just loads in the trees 
+raxmlCF = readTrees2CF("raxml/besttrees.tre", writeTab=false, writeSummary=false)
+astraltree = readMultiTopology("astral/astral.tre")[102] 
+#estimating networks 
+net0= snaq!(astraltree, raxmlCF, hmax=0, filename="snaq/net0_raxml") ## no hybrids
+net1= snaq!(net0, raxmlCF, hmax=1, filename="snaq/net1_raxml") ## 1 hybridization event 
+net2= snaq!(net1, raxmlCF, hmax=2, filename="snaq/net2_raxml") ## 2 hybridization events 
+#ploting the created networks 
+##root the network at outgroup
+rootatnode!(net0, "outgroup")
+plot(net0, :R);
+##repeat for other networks 
+#to see hybridization events b 
+plot(net1, :R, showGamma=true);
+##check which hybridization is most likely 
+scores = [net0.loglik, net1.loglik, net2.loglik]
+R"pdf"("score-vs-h.pdf", width=4, height=4);
+R"plot"(x=0:2, y=scores, type="b", xlab="number of hybridizations h",
+        ylab="network score");
+R"dev.off"();
 ##Set soem varibales for filenames, so it easy to re-run without overwriting data
 STUB="ALL"
 BEDNAME="ALL.AUTO"
