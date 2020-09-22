@@ -31,9 +31,24 @@ samtools view -h -b -q 20 $mapping_4 > $mapping_5
 samtools mpileup -u -g -f $reference_genome $sample_one $sample_two  | bcftools call -v -m -O z -o $vcf_name
 ##Filtering vcf
 vcftools --gzvcf $vcf_name --remove-indels --maf $MAF --max-missing $MISS --minQ $QUAL --recode --stdout | gzip -c > $VCF_OUT
-## creating Vcf for structure plots 
+#we only want chromosome data 
+#chromIDs can be found:https://www.ncbi.nlm.nih.gov/assembly/GCF_002263795.1
+bcftools view test.vcf.bgz --regions   NC_037328.1, NC_037329.1, NC_037330.1, NC_037331.1, NC_037332.1, NC_037333.1, NC_037334.1, NC_037335.1, NC_037336.1, NC_037337.1, NC_037338.1, NC_037339.1, NC_037340.1, NC_037341.1, NC_037342.1, NC_037343.1, NC_037344.1, NC_037345.1, NC_037346.1, NC_037347.1, NC_037348.1, NC_037349.1, NC_037350.1, NC_037351.1, NC_037352.1, NC_037353.1, NC_037354.1, NC_037355.1, NC_037356.1, NC_037357.1 >   ChrALL.vcf
+####STRUCTURE PLOTS
+## creating Vcf for structure plots this vcf is only used for structure plot 
+vcftools --remove-indv $outgroup --vcf $VCF_OUT --recode --out $no_outgroup.vcf 
+#remove multiallelic-sites 
+bcftools view --max-alleles 2 --exclude-types indels $no_outgroup > $no_ma_no_outgroup
+#vcf to bed format 
+plink2 --vcf $no_ma_no_outgroup --double-id --allow-extra-chr --set-missing-var-ids @:# --make-bed -out $bed_files
+#fastStrucutre 
+python structure.py -K 3 --input=genotypes --output=genotypes_output
+python distruct.py -K 3--input=test/testoutput_simple --output=test/testoutput_simple_distruct.svg
+##calculate D+ genomewide use the following 
+#have a meta file with "samplename in vcf\tsimple name"
+bash ../SharedRepos/SummerGenomics/run_bash_python_bos_indicus-p1.sh
 
-## for networks 
+## for networks use vcf with outgroup
 ## make sure that this vcf has an outgroup!
 git clone https://github.com/crsl4/PhyloNetworks.jl.git
 #you will need the scripts folder 
@@ -64,9 +79,9 @@ using Distributed #allows you to  run the anaylsis on multiple processors
 raxmlCF = readTrees2CF("raxml/besttrees.tre", writeTab=false, writeSummary=false)
 astraltree = readMultiTopology("astral/astral.tre")[102] 
 #estimating networks 
-net0= snaq!(astraltree, raxmlCF, hmax=0, filename="snaq/net0_raxml") ## no hybrids
-net1= snaq!(net0, raxmlCF, hmax=1, filename="snaq/net1_raxml") ## 1 hybridization event 
-net2= snaq!(net1, raxmlCF, hmax=2, filename="snaq/net2_raxml") ## 2 hybridization events 
+net0= snaq!(astraltree, raxmlCF, hmax=0, filename="net0_raxml") ## no hybrids
+net1= snaq!(net0, raxmlCF, hmax=1, filename="net1_raxml") ## 1 hybridization event 
+net2= snaq!(net1, raxmlCF, hmax=2, filename="net2_raxml") ## 2 hybridization events 
 #ploting the created networks 
 ##root the network at outgroup
 rootatnode!(net0, "outgroup")
@@ -80,6 +95,16 @@ R"pdf"("score-vs-h.pdf", width=4, height=4);
 R"plot"(x=0:2, y=scores, type="b", xlab="number of hybridizations h",
         ylab="network score");
 R"dev.off"();
+
+## bootstrapping 
+bootTrees = readBootstrapTrees("astral/BSlistfiles")
+bootnet = bootsnaq(net0, bootTrees, hmax=1, nrep=50, runs=3,
+                   filename="bootsnaq1_raxmlboot")
+bootnet = readMultiTopology("bootsnaq1_raxmlboot.out");
+
+rootatnode!(net1, "6")
+rotate!(net1, -4)
+
 ##Set soem varibales for filenames, so it easy to re-run without overwriting data
 STUB="ALL"
 BEDNAME="ALL.AUTO"
