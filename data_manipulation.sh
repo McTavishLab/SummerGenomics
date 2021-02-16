@@ -37,7 +37,7 @@ bcftools view test.vcf.bgz --regions   NC_037328.1, NC_037329.1, NC_037330.1, NC
 ####STRUCTURE PLOTS
 ## creating Vcf for structure plots this vcf is only used for structure plot 
 vcftools --remove-indv $outgroup --vcf $VCF_OUT --recode --out $no_outgroup.vcf 
-#remove multiallelic-sites 
+#remove multiallelic-sites can be combined for when chroms are pulled out  
 bcftools view --max-alleles 2 --exclude-types indels $no_outgroup > $no_ma_no_outgroup
 #vcf to bed format 
 plink2 --vcf $no_ma_no_outgroup --double-id --allow-extra-chr --set-missing-var-ids @:# --make-bed -out $bed_files
@@ -50,7 +50,9 @@ bash ../SharedRepos/SummerGenomics/run_bash_python_bos_indicus-p1.sh
 
 ## for networks use vcf with outgroup
 ## make sure that this vcf has an outgroup!
-git clone https://github.com/crsl4/PhyloNetworks.jl.git
+#add the outgroup by doing 
+vcftools --keep ../../water_buffalo_2.sorted.dedup.q20.bam --gzvcf vcf_for_structure_plot.vcf.gz --recode --out waterbuff_only.vcf.gzgit clone https://github.com/crsl4/PhyloNetworks.jl.git
+bcftools merge vcf_structure_filtered.vcf.gz waterbuff_only.vcf.gz > filtered_and_waterbuff.vcf
 #you will need the scripts folder 
 ##maybe move the scripts folder into the folder where you want to place your analysis in 
 mkdir input 
