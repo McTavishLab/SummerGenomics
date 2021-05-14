@@ -43,7 +43,11 @@ sep = "/"
 mito_tag = "NC_006853.1"
 
 #Open file
-file = gzip.open(param.infile,"r")
+if 'gz' in param.infile:
+	file = gzip.open(param.infile, 'r')
+else:
+	file = open(param.infile, 'r')
+
 line = file.readline()
 
 #Define nucleotides
