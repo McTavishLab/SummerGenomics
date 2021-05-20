@@ -68,8 +68,9 @@ for pop in populations:
 abba = 0.0;baba = 0.0
 #Keep count of baaa and abaa
 baaa = 0.0;abaa = 0.0
-counter =0.0
-
+counter = 0.0
+#want to keep track of all sites, including shared alleles between pop 1 & 2 ex. BBAA
+all_sites = 0.0
 #Go through line by line
 for line in file:
   counter += 1
@@ -94,7 +95,8 @@ for line in file:
         genotype = genotype_raw.split(':')[0]
         alleles["pop"+str(pop_count)] = random_geno(genotype,sep)
         pop_count+=1
-
+  #tracking all sites (counting) ex. BBAA #all sites equals informative & non-informative sites
+  all_sites += 1
   #Ignore sites where p1 and p2 have same allele
   if(alleles["pop1"] == alleles["pop2"]):
     continue
@@ -130,19 +132,24 @@ try:
   dplus = dplus_numerator/dplus_denom
 except ZeroDivisionError:
   dplus = 'nan'
-
+# counting number of informative site for d
+d_informative_sites = abba + baba
+#counting number of informative sites for dplus
+dplus_informative_sites = abaa + baaa
 #Output results. If outfile already exists, append to it instead of creating outfile again
 if(os.path.exists(param.outfile)):
   fout = open(param.outfile,"a+")
   outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"
+  outline += str(all_sites)"\t" + str(d_informative_sites)"\t" + str(dplus_informative_sites)"\t"
   outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d) + "\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
 else:
   fout = open(param.outfile,"w")
-  outfile_header="p1\tp2\tp3\tp4\tABBA\tBABA\tBAAA\tABAA\tD\tD+\n"
+  outfile_header="p1\tp2\tp3\tp4\tall_sites\td_informative_sites\tdplus_informative_sites\tABBA\tBABA\tBAAA\tABAA\tD\tD+\n"
   fout.write(outfile_header)
   outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"
+  outline += str(all_sites)+"\t" + str(d_informative_sites)+"\t" + str(dplus_informative_sites)+"\t"
   outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d)+"\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
