@@ -140,7 +140,7 @@ dplus_informative_sites = abaa + baaa
 if(os.path.exists(param.outfile)):
   fout = open(param.outfile,"a+")
   outline = param.p1+"\t"+param.p2+"\t"+param.p3+"\t"+param.p4+"\t"
-  outline += str(all_sites)"\t" + str(d_informative_sites)"\t" + str(dplus_informative_sites)"\t"
+  outline += str(all_sites)+"\t" + str(d_informative_sites)+"\t" + str(dplus_informative_sites)+"\t"
   outline += str(abba) + "\t" + str(baba) +"\t"+ str(baaa) +"\t"+ str(abaa) +"\t"+ str(d) + "\t"+str(dplus)+"\n"
   fout.write(outline)
   fout.close()
